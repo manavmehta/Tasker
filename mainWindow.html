@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tasker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+</head>
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <a class="brand-logo center">Tasker</a>
+  </div>
+</nav>
+ <p>General Instructions:<br>
+<ul>
+  <li>Use ctrl + '+' buttons to add a task</li >
+  <li>Use ctrl + '-' buttons to clear all tasks</li>
+  <li>Double Click a task to remove it</li>
+  <li>Press escape key while on Add Item Window to close it</li>
+  <li>Use ctrl + 'Q' buttons to Quit</li>
+</ul>
+</p>
+<h2>My Tasks</h2>
+ <ol class="collection"></ol>
+  <script>
+    const electron = require('electron');
+    const {ipcRenderer} = electron;
+    const ol = document.querySelector('ol'); 
+
+    ipcRenderer.on('item:add', function(e,item){
+      const li = document.createElement('li');
+      const itemText = document.createTextNode(item);
+      li.appendChild(itemText);
+      ol.appendChild(li);
+    });
+
+    ipcRenderer.on('item:clear', function(){
+      ol.innerHTML='';
+    });
+
+    ol.addEventListener('dblclick',removeitem);
+    function removeitem(e){
+      e.target.remove();
+    };
+    
+  </script>
+ </body>
+</html>
