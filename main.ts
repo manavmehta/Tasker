@@ -1,128 +1,110 @@
 const electron = require('electron');
-const path = require('path');
-const url = require('url');
+const path     = require('path');
+const url      = require('url');
+const schedule = require('node-schedule');
 
-const {app, BrowserWindow, Menu, ipcMain} = electron;
+const {app, BrowserWindow, Menu, ipcMain, dialog} = electron;
 
-let mainWindow;
-
-// Listen for app to be ready
-app.on('ready', function(){
-  // Create new window
-  mainWindow = new BrowserWindow({});
-  // Load html in window
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'mainWindow.html'),
-    protocol: 'file:',
-    slashes:true
-  }));
-  // Build menu from template
-  const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
-  // Insert menu
-  Menu.setApplicationMenu(mainMenu);
-});
+let mainWindow, addWindow;
 
 // // Uncomment the following code if the add item still persists when app is Quit
 // mainWindow.on('closed', function(){
 //   app.quit();
 // });
-
-
-function CreateAddWindow(){
+  
+  
+const CreateAddWindow = () => {
   addWindow = new BrowserWindow({
     width:400,
     height:200,
     title:"Add task"
   });
-  // Load html in window
+  
   addWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'addWindow.html'),
     protocol: 'file:',
     slashes:true
   }));
-  // Build menu from template
+  
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
-  // Insert menu
   Menu.setApplicationMenu(mainMenu);
-
-
-
-  addWindow.on('close', function(){
+  
+  addWindow.on('close', () => {
     addWindow = null;
   });
-
+  
 };
 
-
-ipcMain.on('item:add',function(e,item){
-  // console.log(item);
+ipcMain.on('item:add',(event,item) => {
+  
   mainWindow.webContents.send('item:add',item);
   addWindow.close();
+  
 });
-
-
 
 const mainMenuTemplate = [
   {},  
   {
-        label:"File",
-        submenu:[
-            {
-              label:'Add Task',
-              accelerator:"Ctrl+=",
-              click(){
-                CreateAddWindow();
-              }
-            },
-            {
-              label:'Clear Tasks',
-              accelerator:"Ctrl+-",
-              click(){
-                mainWindow.webContents.send('item:clear');
-              }
-            },
-            {
-              label: 'Close', // Need to add a clause for it should only work if on AddWindow Screen
-              accelerator: "esc",
-              click(){
-                addWindow.close();
-              }
-            },
-            {
-              label: 'Quit',
-              accelerator: process.platform=="darwin" ? "Command+Q" : "Ctrl+Q",
-              click(){
-                app.quit();
-              }
-            }
-          ]
-    }
-];
-
-// if (process.platform=="darwin"){
-//   mainMenuTemplate.unshift({});
-// }
-
-if(process.env.NODE_ENV!=='production'){
-  mainMenuTemplate.push(
-    {
-    label:'Developer Tools',
+    label:"File",
     submenu:[
       {
-        role:'reload'
+        label:'Add Task',
+        accelerator:"Ctrl+=",
+        click(){
+          CreateAddWindow();
+        }
       },
       {
-        label:"Toggle DevTools",
-        accelerator: process.platform=="darwin" ? "Command+I" : "Ctrl+I ",
+        label:'Clear Tasks',
+        accelerator:"Ctrl+-",
+        click(){
+          mainWindow.webContents.send('item:clear');
+        }
+      },
+      {
+        label: 'Close', // Need to add a clause for it to only work if on AddWindow Screen
+        accelerator: "esc",
+        click(){
+          addWindow.close();
+        }
+      },
+      {
+        label: 'Quit',
+        accelerator: process.platform=="darwin" ? "Command+Q" : "Ctrl+Q",
         click(){
           app.quit();
-        },
-        click(item, focussedWindow){
-          focussedWindow.toggleDevTools();
         }
       }
-      
     ]
   }
-  );
-}
+];
+
+app.on('ready', () => {
+  
+  mainWindow = new BrowserWindow({});
+  
+  mainWindow.loadURL(url.format({
+    
+    pathname: path.join(__dirname, 'mainWindow.html'),
+    protocol: 'file:',
+    slashes:true
+
+  }));
+
+  const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+  Menu.setApplicationMenu(mainMenu);
+
+});
+
+// function openShortcuts() {
+//   const shortcut = (mainWindow as any).querySelector('.shortcuts');
+//   shortcut.addEventListener('click', () => {
+//     dialog(`Ctrl + '+' : Add a task
+//     Ctrl + '-' : Clear all tasks\
+//     Double Click a task to remove it
+//     Escape key : Close Add Item Window
+//     Ctrl + 'Q' : Quit the app`)
+//   });
+// }
+
+// openShortcuts();

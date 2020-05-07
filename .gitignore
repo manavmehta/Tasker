@@ -1,0 +1,23 @@
+# Dependency directory
+/node_modules/
+
+# npm cache directory
+.npm
+
+# Compiled binary build directory
+dist/
+
+# dotenv environment variables file
+.env
+
+# miscellaneous
+.idea
+config.gypi
+
+# Test generated files
+# tests/package.json
+
+.python-version
+
+# Ignore all the typescript compiled files
+*.js
